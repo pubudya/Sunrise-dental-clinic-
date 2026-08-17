@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Registration | Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-brand">
+            <div class="logo-icon">&#128100;</div>
+            <h1>Join Our Team</h1>
+            <p>Register as clinic staff to manage appointments, patient records, and billing. Your account is activated immediately.</p>
+            <ul class="features">
+                <li>Instant STAFF account activation</li>
+                <li>Secure BCrypt password storage</li>
+                <li>Unique username and mobile number</li>
+                <li>Admin manages elevated access separately</li>
+            </ul>
+        </div>
+        <div class="login-form-panel">
+            <h2>Staff Registration</h2>
+            <p class="subtitle">Create your staff account (STAFF role)</p>
+            <div id="alertBox"></div>
+            <form id="registerStaffForm">
+                <div class="form-group">
+                    <label>Full Name <span class="required">*</span></label>
+                    <input type="text" name="fullName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number <span class="required">*</span></label>
+                    <input type="tel" name="mobileNumber" class="form-control"
+                           pattern="[0-9]{10}" maxlength="10" placeholder="0771234567" required>
+                </div>
+                <div class="form-group">
+                    <label>Username <span class="required">*</span></label>
+                    <input type="text" name="username" class="form-control" minlength="4" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Password <span class="required">*</span></label>
+                        <input type="password" name="password" class="form-control" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password <span class="required">*</span></label>
+                        <input type="password" name="confirmPassword" class="form-control" minlength="6" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Register as Staff</button>
+            </form>
+            <p class="auth-link">Already registered? <a href="login.html">Sign in</a></p>
+        </div>
+    </div>
+</div>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+    checkSession(false).then(user => {
+        if (user) window.location.href = getDashboardPath(user);
+    });
+
+    document.getElementById('registerStaffForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const result = await apiPost('/register', {
+            fullName: form.fullName.value.trim(),
+            mobileNumber: form.mobileNumber.value.trim(),
+            username: form.username.value.trim(),
+            password: form.password.value,
+            confirmPassword: form.confirmPassword.value
+        });
+        if (result.success) {
+            showAlert('alertBox', 'Registration successful! Redirecting to login...', 'success');
+            setTimeout(() => window.location.href = 'login.html', 1500);
+        } else {
+            showAlert('alertBox', result.message, 'error');
+        }
+    });
+</script>
+</body>
+</html>

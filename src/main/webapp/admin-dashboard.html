@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="admin-dashboard">
+<div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Admin Dashboard</h1>
+            <p>Manage clinic operations, staff accounts, and dentist schedules.</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon teal">&#128197;</div>
+                <div class="stat-info"><h3 id="totalAppt">0</h3><p>Total Appointments</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">&#128336;</div>
+                <div class="stat-info"><h3 id="todayAppt">0</h3><p>Today's Appointments</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">&#128104;</div>
+                <div class="stat-info"><h3 id="dentistCount">0</h3><p>Active Dentists</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber">&#128101;</div>
+                <div class="stat-info"><h3 id="staffCount">0</h3><p>Active Staff</p></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2 class="card-title">Admin Quick Actions</h2>
+            <div class="quick-actions">
+                <a href="manage-staff.html" class="action-card">
+                    <div class="action-icon">&#128101;</div><h3>Manage Staff</h3><p>Add, edit, or deactivate staff accounts</p>
+                </a>
+                <a href="dentists.html" class="action-card">
+                    <div class="action-icon">&#129463;</div><h3>Manage Dentists</h3><p>Update dentist details and schedules</p>
+                </a>
+                <a href="register.html" class="action-card">
+                    <div class="action-icon">&#10010;</div><h3>Register Appointment</h3><p>Book a new patient visit</p>
+                </a>
+                <a href="view-appointment.html" class="action-card">
+                    <div class="action-icon">&#128269;</div><h3>Search Appointments</h3><p>Find by number, name, or mobile</p>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+    requireAdmin().then(async user => {
+        if (!user) return;
+        const result = await apiGet('/dashboard');
+        if (result.success) {
+            document.getElementById('totalAppt').textContent = result.data.totalAppointments;
+            document.getElementById('todayAppt').textContent = result.data.todayAppointments;
+            document.getElementById('dentistCount').textContent = result.data.dentistCount;
+            document.getElementById('staffCount').textContent = result.data.staffCount || 0;
+        }
+    });
+</script>
+</body>
+</html>

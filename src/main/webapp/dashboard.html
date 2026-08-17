@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="dashboard">
+<div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Dashboard</h1>
+            <p>Welcome back! Here's an overview of clinic activity.</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon teal">&#128197;</div>
+                <div class="stat-info"><h3 id="totalAppt">0</h3><p>Total Appointments</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">&#128336;</div>
+                <div class="stat-info"><h3 id="todayAppt">0</h3><p>Today's Appointments</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">&#128104;</div>
+                <div class="stat-info"><h3 id="dentistCount">0</h3><p>Available Dentists</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon amber">&#128137;</div>
+                <div class="stat-info"><h3 id="treatmentCount">0</h3><p>Treatment Types</p></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2 class="card-title">Quick Actions</h2>
+            <div class="quick-actions">
+                <a href="register.html" class="action-card">
+                    <div class="action-icon">&#10010;</div><h3>Register Appointment</h3><p>Book a new patient visit</p>
+                </a>
+                <a href="view-appointment.html" class="action-card">
+                    <div class="action-icon">&#128269;</div><h3>View Appointment</h3><p>Search by number, name, or mobile</p>
+                </a>
+                <a href="bill.html" class="action-card">
+                    <div class="action-icon">&#128176;</div><h3>Calculate Bill</h3><p>Generate patient receipt</p>
+                </a>
+                <a href="help.html" class="action-card">
+                    <div class="action-icon">&#10067;</div><h3>Help Guide</h3><p>Step-by-step instructions</p>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+    requireLogin().then(async user => {
+        if (!user) return;
+        if (user.role === 'ADMIN') {
+            window.location.href = 'admin-dashboard.html';
+            return;
+        }
+        const result = await apiGet('/dashboard');
+        if (result.success) {
+            document.getElementById('totalAppt').textContent = result.data.totalAppointments;
+            document.getElementById('todayAppt').textContent = result.data.todayAppointments;
+            document.getElementById('dentistCount').textContent = result.data.dentistCount;
+            document.getElementById('treatmentCount').textContent = result.data.treatmentCount;
+        }
+    });
+</script>
+</body>
+</html>

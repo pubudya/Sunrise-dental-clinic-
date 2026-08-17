@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Dentists | Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="dentists">
+<div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Manage Dentists</h1>
+            <p>Add, edit, and activate/deactivate dentist profiles and working hours.</p>
+        </div>
+        <div id="alertBox"></div>
+        <div class="card">
+            <h2 class="card-title" id="formTitle">Add New Dentist</h2>
+            <form id="dentistForm">
+                <input type="hidden" name="id" value="">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name <span class="required">*</span></label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Specialization <span class="required">*</span></label>
+                        <input type="text" name="specialization" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Mobile Number <span class="required">*</span></label>
+                        <input type="tel" name="mobileNumber" class="form-control"
+                               pattern="[0-9]{10}" maxlength="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="active" class="form-control">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Work Start Time <span class="required">*</span></label>
+                        <input type="time" name="workStartTime" class="form-control" value="08:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Work End Time <span class="required">*</span></label>
+                        <input type="time" name="workEndTime" class="form-control" value="18:00" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save Dentist</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+                </div>
+            </form>
+        </div>
+        <div class="card" id="dentistTableBox" style="margin-top:24px;"></div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+    let dentistList = [];
+
+    requireAdmin().then(async () => {
+        await loadDentists();
+    });
+
+    async function loadDentists() {
+        const result = await apiGet('/dentists');
+        const box = document.getElementById('dentistTableBox');
+        if (!result.success) {
+            showAlert('alertBox', result.message, 'error');
+            return;
+        }
+
+        dentistList = result.data;
+        const rows = dentistList.map(d => `
+            <tr>
+                <td>${d.name}</td>
+                <td>${d.specialization}</td>
+                <td>${d.mobileNumber}</td>
+                <td>${d.workStartTime} - ${d.workEndTime}</td>
+                <td><span class="badge ${d.active ? 'badge-green' : 'badge-red'}">${d.active ? 'Active' : 'Inactive'}</span></td>
+                <td class="table-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="editDentistById(${d.id})">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="toggleDentist(${d.id}, ${!d.active})">${d.active ? 'Deactivate' : 'Activate'}</button>
+                </td>
+            </tr>`).join('');
+
+        box.innerHTML = `<h2 class="card-title">All Dentists</h2>
+            <div class="table-wrapper"><table class="data-table">
+            <thead><tr><th>Name</th><th>Specialization</th><th>Mobile</th><th>Hours</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="6">No dentists found.</td></tr>'}</tbody></table></div>`;
+    }
+
+    function editDentistById(id) {
+        const dentist = dentistList.find(d => d.id === id);
+        if (!dentist) return;
+        editDentist(dentist);
+    }
+
+    function editDentist(dentist) {
+        const form = document.getElementById('dentistForm');
+        form.id.value = dentist.id;
+        form.name.value = dentist.name;
+        form.specialization.value = dentist.specialization;
+        form.mobileNumber.value = dentist.mobileNumber;
+        form.workStartTime.value = dentist.workStartTime;
+        form.workEndTime.value = dentist.workEndTime;
+        form.active.value = dentist.active ? 'true' : 'false';
+        document.getElementById('formTitle').textContent = 'Edit Dentist';
+        document.getElementById('saveBtn').textContent = 'Update Dentist';
+    }
+
+    function resetForm() {
+        const form = document.getElementById('dentistForm');
+        form.reset();
+        form.id.value = '';
+        form.workStartTime.value = '08:00';
+        form.workEndTime.value = '18:00';
+        document.getElementById('formTitle').textContent = 'Add New Dentist';
+        document.getElementById('saveBtn').textContent = 'Save Dentist';
+    }
+
+    document.getElementById('dentistForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const payload = {
+            id: form.id.value ? Number(form.id.value) : undefined,
+            name: form.name.value.trim(),
+            specialization: form.specialization.value.trim(),
+            mobileNumber: form.mobileNumber.value.trim(),
+            workStartTime: form.workStartTime.value,
+            workEndTime: form.workEndTime.value,
+            active: form.active.value === 'true'
+        };
+
+        const isEdit = !!form.id.value;
+        const result = isEdit ? await apiPut('/dentists', payload) : await apiPost('/dentists', payload);
+        if (result.success) {
+            showAlert('alertBox', isEdit ? 'Dentist updated.' : 'Dentist created.', 'success');
+            resetForm();
+            await loadDentists();
+        } else {
+            showAlert('alertBox', result.message, 'error');
+        }
+    });
+
+    async function toggleDentist(id, active) {
+        const result = await apiDelete('/dentists?id=' + id + '&active=' + active);
+        if (result.success) {
+            showAlert('alertBox', active ? 'Dentist activated.' : 'Dentist deactivated.', 'success');
+            await loadDentists();
+        } else {
+            showAlert('alertBox', result.message, 'error');
+        }
+    }
+</script>
+</body>
+</html>

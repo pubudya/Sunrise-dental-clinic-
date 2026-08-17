@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Appointment | Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="register">
+<div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Register New Appointment</h1>
+            <p>Enter patient details and schedule a new dental visit.</p>
+        </div>
+        <div id="alertBox"></div>
+        <div class="card">
+            <h2 class="card-title">Patient &amp; Appointment Details</h2>
+            <form id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Patient Name <span class="required">*</span></label>
+                        <input type="text" name="patientName" class="form-control" placeholder="Full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Number <span class="required">*</span></label>
+                        <input type="tel" name="contactNumber" class="form-control"
+                               placeholder="0771234567" pattern="[0-9]{10}" maxlength="10" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Address <span class="required">*</span></label>
+                    <textarea name="address" class="form-control" placeholder="Residential address" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Appointment Date <span class="required">*</span></label>
+                        <input type="date" name="appointmentDate" id="appointmentDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Appointment Time <span class="required">*</span></label>
+                        <input type="time" name="appointmentTime" id="appointmentTime" class="form-control" min="08:00" max="18:00" required>
+                    </div>
+                </div>
+                <div class="form-actions" style="border-top:none; padding-top:0; margin-top:0;">
+                    <button type="button" id="checkAvailabilityBtn" class="btn btn-secondary">Check Available Dentists</button>
+                </div>
+                <div id="availabilityBox"></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Dentist <span class="required">*</span></label>
+                        <select name="dentistId" id="dentistSelect" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Treatment Type <span class="required">*</span></label>
+                        <select name="treatmentId" id="treatmentSelect" class="form-control" required></select>
+                    </div>
+                </div>
+                <div class="alert alert-info">
+                    <span>&#9432;</span> All fields are required. Mobile must be exactly 10 digits. Clinic hours: 08:00 AM – 06:00 PM.
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Register Appointment</button>
+                    <a href="dashboard.html" class="btn btn-secondary" id="cancelLink">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+    let metaDentists = [];
+
+    requireLogin().then(async user => {
+        if (!user) return;
+        document.getElementById('cancelLink').href = getDashboardPath(user);
+        document.getElementById('appointmentDate').min = new Date().toISOString().split('T')[0];
+
+        const meta = await apiGet('/meta');
+        if (meta.success) {
+            metaDentists = meta.data.dentists;
+            populateDentists(metaDentists);
+
+            const tSel = document.getElementById('treatmentSelect');
+            tSel.innerHTML = '<option value="">-- Select Treatment --</option>';
+            meta.data.treatmentTypes.forEach(t => {
+                tSel.innerHTML += `<option value="${t.id}">${t.name} (${formatMoney(t.cost)})</option>`;
+            });
+        }
+    });
+
+    function populateDentists(dentists) {
+        const dSel = document.getElementById('dentistSelect');
+        dSel.innerHTML = '<option value="">-- Select Dentist --</option>';
+        dentists.forEach(d => {
+            dSel.innerHTML += `<option value="${d.id}">${d.name} (${d.specialization})</option>`;
+        });
+    }
+
+    document.getElementById('checkAvailabilityBtn').addEventListener('click', async function() {
+        const date = document.getElementById('appointmentDate').value;
+        const time = document.getElementById('appointmentTime').value;
+        const box = document.getElementById('availabilityBox');
+
+        if (!date || !time) {
+            showAlert('alertBox', 'Select date and time before checking availability.', 'error');
+            return;
+        }
+
+        const result = await apiGet('/dentists?available=true&date=' + encodeURIComponent(date) + '&time=' + encodeURIComponent(time));
+        if (!result.success) {
+            showAlert('alertBox', result.message, 'error');
+            box.innerHTML = '';
+            return;
+        }
+
+        if (result.data.length === 0) {
+            box.innerHTML = '<div class="alert alert-error"><span>&#9888;</span> No dentists available for the selected slot.</div>';
+            populateDentists([]);
+            return;
+        }
+
+        populateDentists(result.data);
+        box.innerHTML = '<div class="alert alert-success"><span>&#10003;</span> ' +
+            result.data.length + ' dentist(s) available: ' +
+            result.data.map(d => d.name).join(', ') + '</div>';
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+            patientName: form.patientName.value.trim(),
+            address: form.address.value.trim(),
+            contactNumber: form.contactNumber.value.trim(),
+            dentistId: form.dentistId.value,
+            treatmentId: form.treatmentId.value,
+            appointmentDate: form.appointmentDate.value,
+            appointmentTime: form.appointmentTime.value
+        };
+        const result = await apiPost('/appointments', data);
+        if (result.success) {
+            window.location.href = 'view-appointment.html?number=' + result.data.appointmentNumber;
+        } else {
+            showAlert('alertBox', result.message, 'error');
+        }
+    });
+</script>
+</body>
+</html>

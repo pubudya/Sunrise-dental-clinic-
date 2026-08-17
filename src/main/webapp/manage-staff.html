@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Staff | Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="staff">
+<div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Manage Staff Accounts</h1>
+            <p>View, edit, activate/deactivate, reset passwords, or delete staff accounts.</p>
+        </div>
+        <div id="alertBox"></div>
+        <div class="card" id="staffTableBox"></div>
+        <div class="card" id="editBox" style="display:none; margin-top:24px;"></div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+    let staffList = [];
+    let currentUser = null;
+
+    requireAdmin().then(async user => {
+        if (!user) return;
+        currentUser = user;
+        await loadStaff();
+    });
+
+    async function loadStaff() {
+        const result = await apiGet('/staff');
+        const box = document.getElementById('staffTableBox');
+        if (!result.success) {
+            showAlert('alertBox', result.message, 'error');
+            return;
+        }
+        staffList = result.data;
+        if (staffList.length === 0) {
+            box.innerHTML = '<div class="alert alert-info">No staff accounts found.</div>';
+            return;
+        }
+
+        const rows = staffList.map(s => `
+            <tr>
+                <td>${s.fullName}</td>
+                <td>${s.username}</td>
+                <td>${s.mobileNumber}</td>
+                <td><span class="badge ${s.role === 'ADMIN' ? 'badge-amber' : 'badge-teal'}">${s.role}</span></td>
+                <td><span class="badge ${s.active ? 'badge-green' : 'badge-red'}">${s.active ? 'Active' : 'Inactive'}</span></td>
+                <td class="table-actions">
+                    ${s.role !== 'ADMIN' ? `<button class="btn btn-secondary btn-sm" onclick="editStaff(${s.id})">Edit</button>` : '<span class="text-muted">Protected</span>'}
+                </td>
+            </tr>`).join('');
+
+        box.innerHTML = `<div class="table-wrapper"><table class="data-table">
+            <thead><tr><th>Name</th><th>Username</th><th>Mobile</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>${rows}</tbody></table></div>`;
+    }
+
+    function editStaff(id) {
+        const staff = staffList.find(s => s.id === id);
+        if (!staff) return;
+
+        const box = document.getElementById('editBox');
+        box.style.display = 'block';
+        box.innerHTML = `
+            <h2 class="card-title">Edit Staff: ${staff.fullName}</h2>
+            <form id="editStaffForm">
+                <input type="hidden" name="id" value="${staff.id}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="fullName" class="form-control" value="${staff.fullName}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="tel" name="mobileNumber" class="form-control"
+                               pattern="[0-9]{10}" maxlength="10" value="${staff.mobileNumber}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="active" class="form-control">
+                        <option value="true" ${staff.active ? 'selected' : ''}>Active</option>
+                        <option value="false" ${!staff.active ? 'selected' : ''}>Inactive</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetPassword(${staff.id})">Reset Password</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteStaff(${staff.id})">Delete Account</button>
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('editBox').style.display='none'">Cancel</button>
+                </div>
+            </form>`;
+
+        document.getElementById('editStaffForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const form = e.target;
+            const payload = {
+                id: Number(form.id.value),
+                username: staff.username,
+                fullName: form.fullName.value.trim(),
+                mobileNumber: form.mobileNumber.value.trim(),
+                role: staff.role,
+                active: form.active.value === 'true'
+            };
+            const result = await apiPut('/staff', payload);
+            if (result.success) {
+                showAlert('alertBox', 'Staff account updated.', 'success');
+                document.getElementById('editBox').style.display = 'none';
+                await loadStaff();
+            } else {
+                showAlert('alertBox', result.message, 'error');
+            }
+        });
+    }
+
+    async function resetPassword(id) {
+        const newPassword = prompt('Enter new password (minimum 6 characters):');
+        if (!newPassword) return;
+        const result = await apiPost('/staff', { action: 'resetPassword', userId: id, newPassword });
+        if (result.success) {
+            showAlert('alertBox', result.data.message, 'success');
+        } else {
+            showAlert('alertBox', result.message, 'error');
+        }
+    }
+
+    async function deleteStaff(id) {
+        if (!confirm('Delete this staff account permanently?')) return;
+        const result = await apiPost('/staff', { action: 'delete', userId: id });
+        if (result.success) {
+            showAlert('alertBox', result.data.message, 'success');
+            document.getElementById('editBox').style.display = 'none';
+            await loadStaff();
+        } else {
+            showAlert('alertBox', result.message, 'error');
+        }
+    }
+</script>
+</body>
+</html>

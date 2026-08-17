@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculate Bill | Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="bill">
+<div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Calculate &amp; Print Bill</h1>
+            <p>Load an appointment, adjust consultation fee and discounts, save, and print the receipt.</p>
+        </div>
+        <div id="alertBox"></div>
+        <div class="search-box">
+            <form id="searchForm" style="display:flex; gap:12px; width:100%; max-width:600px;">
+                <input type="text" id="searchNumber" class="form-control"
+                       placeholder="Enter appointment number (e.g., APT0001)" required>
+                <button type="submit" class="btn btn-primary">Load Bill</button>
+            </form>
+        </div>
+        <div id="resultBox"></div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>
+    let currentUser = null;
+
+    requireLogin().then(user => { currentUser = user; });
+
+    async function saveBill(formData, box) {
+        const saveResult = await apiPost('/bill', formData);
+        if (saveResult.success) {
+            showAlert('alertBox', 'Bill saved successfully.', 'success');
+            loadBillEditor(box, saveResult.data.appointment.appointmentNumber);
+            const receiptBox = document.createElement('div');
+            receiptBox.id = 'savedReceiptBox';
+            box.appendChild(receiptBox);
+            renderBillReceipt(receiptBox, saveResult.data);
+            if (currentUser) {
+                const backBtn = receiptBox.querySelector('#receiptBackBtn');
+                if (backBtn) backBtn.href = getDashboardPath(currentUser);
+            }
+        } else {
+            showAlert('alertBox', saveResult.message, 'error');
+        }
+    }
+
+    async function loadBillEditor(box, number) {
+        const result = await apiGet('/bill?number=' + encodeURIComponent(number));
+        if (result.success) {
+            renderBillEditor(box, result.data, (formData) => saveBill(formData, box));
+        } else {
+            showAlert('alertBox', result.message, 'error');
+            box.innerHTML = '';
+        }
+    }
+
+    async function loadBill(number) {
+        const box = document.getElementById('resultBox');
+        await loadBillEditor(box, number);
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        loadBill(document.getElementById('searchNumber').value.trim());
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('number')) {
+        document.getElementById('searchNumber').value = params.get('number');
+        loadBill(params.get('number'));
+    }
+</script>
+</body>
+</html>

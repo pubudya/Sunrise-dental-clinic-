@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help | Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="help">
+<div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Help &amp; Instructions</h1>
+            <p>Step-by-step guide for staff and administrators.</p>
+        </div>
+        <div class="card">
+            <div class="help-section">
+                <h3>1. Logging In &amp; Registration</h3>
+                <ol class="help-steps">
+                    <li>Start <strong>WAMP Server</strong> (MySQL must be running — green icon).</li>
+                    <li>Run <strong>DentalClinicApplication.java</strong> from IntelliJ.</li>
+                    <li>New staff can register at <strong>register-staff.html</strong> (instant STAFF access).</li>
+                    <li>Admin login redirects to the admin dashboard; staff login goes to the staff dashboard.</li>
+                </ol>
+            </div>
+            <div class="help-section">
+                <h3>2. Registering a New Appointment</h3>
+                <ol class="help-steps">
+                    <li>Click <strong>Register Appointment</strong> in the sidebar.</li>
+                    <li>Fill in all patient fields. Mobile must be exactly 10 digits.</li>
+                    <li>Select date/time, then click <strong>Check Available Dentists</strong>.</li>
+                    <li>Choose an available dentist and treatment, then submit.</li>
+                </ol>
+            </div>
+            <div class="help-section">
+                <h3>3. Searching Appointments</h3>
+                <ol class="help-steps">
+                    <li>Open <strong>View Appointment</strong>.</li>
+                    <li>Enter appointment number, patient name, and/or mobile (at least one required).</li>
+                    <li>Select a result card to view full details.</li>
+                </ol>
+            </div>
+            <div class="help-section">
+                <h3>4. Calculating and Printing a Bill</h3>
+                <ol class="help-steps">
+                    <li>Click <strong>Calculate Bill</strong> and enter the appointment number.</li>
+                    <li>Adjust consultation fee and apply a percentage or fixed discount.</li>
+                    <li>Click <strong>Save Bill</strong>, then <strong>Preview/Print Receipt</strong>.</li>
+                </ol>
+            </div>
+            <div class="help-section">
+                <h3>5. Admin Tasks</h3>
+                <ol class="help-steps">
+                    <li><strong>Manage Staff:</strong> edit accounts, activate/deactivate, reset passwords, delete staff.</li>
+                    <li><strong>Manage Dentists:</strong> add/edit dentists, set working hours, activate/deactivate.</li>
+                </ol>
+            </div>
+            <div class="help-section">
+                <h3>Technology Used</h3>
+                <ul class="assumptions-list">
+                    <li><strong>Frontend:</strong> HTML + CSS + JavaScript (no JSP)</li>
+                    <li><strong>Backend:</strong> Java Servlets, Services, DAOs (JDBC)</li>
+                    <li><strong>Database:</strong> MySQL via WAMP Server</li>
+                    <li><strong>Security:</strong> BCrypt passwords, session auth, server-side role checks</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script>requireLogin();</script>
+</body>
+</html>
