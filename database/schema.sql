@@ -1,4 +1,5 @@
 -- Sunrise Dental Clinic - MySQL Database Schema
+-- Version 1.0
 -- The Java application also creates/migrates this schema automatically on startup.
 -- Run this script in phpMyAdmin or MySQL CLI for manual setup.
 
