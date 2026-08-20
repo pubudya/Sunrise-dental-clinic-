@@ -7,5 +7,5 @@
  */
 // const API_BASE = 'http://localhost:8080/api';
 
-/** Use this when opening HTML from the Java server (http://localhost:8080/login.html) */
+/** Use this when opening HTML from the Java server (http://localhost:8080/login.html). */
 const API_BASE = '/api';
