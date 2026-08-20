@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JDBC data access for patient appointments, including search and slot checks.
+ */
 public class AppointmentDao {
 
     public String generateNextAppointmentNumber() {

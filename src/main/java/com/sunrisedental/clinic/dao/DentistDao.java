@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JDBC data access for dentist records, working hours, and available time slots.
+ */
 public class DentistDao {
 
     public List<Dentist> findAll() {

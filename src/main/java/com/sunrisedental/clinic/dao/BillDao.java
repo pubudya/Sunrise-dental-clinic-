@@ -10,6 +10,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 
+/**
+ * JDBC data access for appointment bills, including insert and update by appointment.
+ */
 public class BillDao {
 
     public Optional<Bill> findByAppointmentId(int appointmentId) {

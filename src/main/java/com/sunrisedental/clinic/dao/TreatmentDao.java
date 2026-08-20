@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JDBC data access for treatment types and costs used when booking and billing.
+ */
 public class TreatmentDao {
 
     public List<Treatment> findActive() {

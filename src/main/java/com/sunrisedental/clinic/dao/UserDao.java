@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JDBC data access for staff and admin accounts in the users table.
+ */
 public class UserDao {
 
     public Optional<User> findByUsername(String username) {
