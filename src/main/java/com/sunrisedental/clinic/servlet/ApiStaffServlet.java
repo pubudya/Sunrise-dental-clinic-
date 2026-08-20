@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * JSON API for admin staff account listing, updates, and deletion.
+ */
 public class ApiStaffServlet extends HttpServlet {
 
     private final Gson gson = new Gson();

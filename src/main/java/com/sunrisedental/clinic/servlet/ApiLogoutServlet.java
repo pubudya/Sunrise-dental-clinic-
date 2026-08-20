@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * JSON API that ends the current staff or admin session.
+ */
 @WebServlet("/api/logout")
 public class ApiLogoutServlet extends HttpServlet {
 

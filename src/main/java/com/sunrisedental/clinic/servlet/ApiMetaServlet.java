@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * JSON API for lookup data such as treatment types used by the HTML forms.
+ */
 public class ApiMetaServlet extends HttpServlet {
 
     @Override

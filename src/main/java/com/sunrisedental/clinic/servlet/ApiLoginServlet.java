@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * JSON API for staff and admin login and session creation.
+ */
 public class ApiLoginServlet extends HttpServlet {
 
     private final Gson gson = new Gson();

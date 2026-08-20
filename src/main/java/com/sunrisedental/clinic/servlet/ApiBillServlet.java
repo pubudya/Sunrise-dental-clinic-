@@ -14,6 +14,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+/**
+ * JSON API for loading and saving appointment bills.
+ */
 public class ApiBillServlet extends HttpServlet {
 
     private final Gson gson = new Gson();

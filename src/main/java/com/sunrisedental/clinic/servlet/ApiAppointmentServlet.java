@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * JSON API for registering, listing, and searching patient appointments.
+ */
 public class ApiAppointmentServlet extends HttpServlet {
 
     private final Gson gson = new Gson();

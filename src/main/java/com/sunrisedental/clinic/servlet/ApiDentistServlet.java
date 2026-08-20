@@ -14,6 +14,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * JSON API for dentist listing, availability, and admin dentist management.
+ */
 public class ApiDentistServlet extends HttpServlet {
 
     @Override

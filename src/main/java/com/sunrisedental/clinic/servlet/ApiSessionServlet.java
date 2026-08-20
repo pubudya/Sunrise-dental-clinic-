@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
+/**
+ * JSON API that returns the currently logged-in user session.
+ */
 public class ApiSessionServlet extends HttpServlet {
 
     @Override

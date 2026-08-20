@@ -10,6 +10,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+/**
+ * JSON API for staff and admin dashboard statistics.
+ */
 public class ApiDashboardServlet extends HttpServlet {
 
     @Override

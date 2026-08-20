@@ -12,6 +12,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+/**
+ * JSON API for public staff self-registration.
+ */
 public class ApiRegisterServlet extends HttpServlet {
 
     private final Gson gson = new Gson();
