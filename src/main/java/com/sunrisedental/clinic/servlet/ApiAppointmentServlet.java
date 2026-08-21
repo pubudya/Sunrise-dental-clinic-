@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * JSON API for registering, listing, and searching patient appointments.
+ * JSON API for registering, listing, searching, and cancelling patient appointments.
  */
 public class ApiAppointmentServlet extends HttpServlet {
 
@@ -56,6 +56,19 @@ public class ApiAppointmentServlet extends HttpServlet {
                     "message", "Appointment registered successfully!"
             )));
         } catch (IllegalArgumentException | IllegalStateException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            JsonUtil.writeJson(resp, JsonUtil.error(e.getMessage()));
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            ServiceFactory.getAppointmentService().cancelAppointment(req.getParameter("number"));
+            JsonUtil.writeJson(resp, JsonUtil.success(Map.of(
+                    "message", "Appointment cancelled successfully. The dentist slot is now available."
+            )));
+        } catch (IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             JsonUtil.writeJson(resp, JsonUtil.error(e.getMessage()));
         }

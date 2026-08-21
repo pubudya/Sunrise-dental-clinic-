@@ -124,8 +124,11 @@ function renderSidebar(user) {
 
     sidebar.innerHTML = `
         <div class="sidebar-brand">
-            <h2>Sunrise Dental Clinic</h2>
-            <span>Colombo, Sri Lanka</span>
+            <div class="sidebar-tooth">&#129463;</div>
+            <div>
+                <h2>Sunrise Dental Clinic</h2>
+                <span>Colombo, Sri Lanka</span>
+            </div>
         </div>
         <nav class="sidebar-nav">
             <a href="${dashPath}" class="nav-item ${page === 'dashboard' || page === 'admin-dashboard' ? 'active' : ''}">
@@ -182,9 +185,11 @@ function renderAppointmentDetails(container, appt) {
             </div>
             <div class="form-actions">
                 <a href="bill.html?number=${appt.appointmentNumber}" class="btn btn-primary">Calculate Bill</a>
+                <button type="button" class="btn btn-danger" data-cancel-number="${appt.appointmentNumber}">Cancel Appointment</button>
                 <a href="register.html" class="btn btn-secondary">New Appointment</a>
             </div>
         </div>`;
+    bindCancelAppointmentButtons(container);
 }
 
 function renderAppointmentResults(container, appointments, onSelect) {
@@ -210,9 +215,11 @@ function renderAppointmentResults(container, appointments, onSelect) {
                 <span>${appt.dentistName} &mdash; ${appt.treatmentType}</span>
             </div>
             <button type="button" class="btn btn-secondary btn-sm view-result-btn">View Details</button>
+            <button type="button" class="btn btn-danger btn-sm" data-cancel-number="${appt.appointmentNumber}">Cancel</button>
         </div>`).join('');
 
     container.innerHTML = `<div class="result-list">${cards}</div>`;
+    bindCancelAppointmentButtons(container);
 
     container.querySelectorAll('.view-result-btn').forEach((btn, index) => {
         btn.addEventListener('click', () => {
@@ -220,6 +227,45 @@ function renderAppointmentResults(container, appointments, onSelect) {
                 onSelect(appointments[index]);
             } else {
                 renderAppointmentDetails(container, appointments[index]);
+            }
+        });
+    });
+}
+
+async function cancelAppointment(appointmentNumber) {
+    const confirmed = window.confirm(
+        'Cancel appointment ' + appointmentNumber + '?\n\n' +
+        'The dentist slot will become available again. Any saved bill for this appointment will also be deleted.'
+    );
+    if (!confirmed) {
+        return { cancelled: false };
+    }
+    const result = await apiDelete('/appointments?number=' + encodeURIComponent(appointmentNumber));
+    if (!result.success) {
+        window.alert(result.message || 'Could not cancel the appointment.');
+        return { cancelled: false, message: result.message };
+    }
+    return {
+        cancelled: true,
+        message: (result.data && result.data.message) || 'Appointment cancelled successfully.'
+    };
+}
+
+function bindCancelAppointmentButtons(container) {
+    if (!container) return;
+    container.querySelectorAll('[data-cancel-number]').forEach(btn => {
+        btn.addEventListener('click', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const number = btn.getAttribute('data-cancel-number');
+            const outcome = await cancelAppointment(number);
+            if (outcome.cancelled) {
+                if (typeof window.onAppointmentCancelled === 'function') {
+                    window.onAppointmentCancelled(number, outcome.message);
+                } else {
+                    window.alert(outcome.message);
+                    window.location.reload();
+                }
             }
         });
     });

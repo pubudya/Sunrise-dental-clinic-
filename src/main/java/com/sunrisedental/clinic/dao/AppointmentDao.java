@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * JDBC data access for patient appointments, including search and slot checks.
+ * JDBC data access for patient appointments, including search, slot checks, and cancellation.
  */
 public class AppointmentDao {
 
@@ -129,6 +129,17 @@ public class AppointmentDao {
                 WHERE dentist_id = ? AND appointment_date = ? AND appointment_time = ?
                 """;
         return count(sql, dentistId, java.sql.Date.valueOf(date), Time.valueOf(time)) > 0;
+    }
+
+    public boolean deleteByAppointmentNumber(String appointmentNumber) {
+        String sql = "DELETE FROM appointments WHERE appointment_number = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, appointmentNumber.trim().toUpperCase());
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to cancel appointment.", e);
+        }
     }
 
     private String baseSelect() {

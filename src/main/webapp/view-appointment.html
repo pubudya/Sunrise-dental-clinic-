@@ -49,6 +49,12 @@
 <script>
     requireLogin();
 
+    window.onAppointmentCancelled = function(number, message) {
+        showAlert('alertBox', message, 'success');
+        document.getElementById('resultBox').innerHTML = '';
+        document.getElementById('searchForm').reset();
+    };
+
     async function searchAppointments(criteria) {
         const params = new URLSearchParams();
         if (criteria.appointmentNumber) params.set('number', criteria.appointmentNumber);

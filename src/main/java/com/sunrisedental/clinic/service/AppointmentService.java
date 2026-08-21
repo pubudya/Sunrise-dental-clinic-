@@ -97,6 +97,18 @@ public class AppointmentService {
         return appointmentDao.findAll();
     }
 
+    public void cancelAppointment(String appointmentNumber) {
+        if (ValidationUtil.isBlank(appointmentNumber)) {
+            throw new IllegalArgumentException("Appointment number is required.");
+        }
+        String number = appointmentNumber.trim().toUpperCase();
+        appointmentDao.findByAppointmentNumber(number)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment was not found."));
+        if (!appointmentDao.deleteByAppointmentNumber(number)) {
+            throw new IllegalArgumentException("Appointment was not found.");
+        }
+    }
+
     public long getTotalAppointments() {
         return appointmentDao.countAll();
     }

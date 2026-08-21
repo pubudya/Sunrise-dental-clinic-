@@ -18,7 +18,7 @@ HTML/CSS/JS (src/main/webapp/) → Java Servlets (/api/*) → Services → DAOs 
 
 | Role | Access |
 |------|--------|
-| **STAFF** | Register/view appointments, search, billing, help |
+| **STAFF** | Register/view/cancel appointments, search, billing, help |
 | **ADMIN** | All staff features + manage staff accounts + manage dentists |
 
 - Staff self-registration creates an **active STAFF** account immediately (`register-staff.html`)
@@ -76,9 +76,9 @@ mvn compile exec:java -Dexec.mainClass="com.sunrisedental.clinic.DentalClinicApp
 | `manage-staff.html` | Admin staff CRUD |
 | `dentists.html` | Admin dentist CRUD |
 | `register.html` | Register appointment + check dentist availability |
-| `view-appointment.html` | Search by number, name, and/or mobile |
+| `view-appointment.html` | Search by number, name, and/or mobile; cancel appointment |
 | `bill.html` | Load/save bill with consultation fee and discounts |
-| `appointments.html` | List all appointments |
+| `appointments.html` | List all appointments and cancel a booking |
 | `help.html` | Help guide |
 
 ## API Routes
@@ -99,6 +99,7 @@ mvn compile exec:java -Dexec.mainClass="com.sunrisedental.clinic.DentalClinicApp
 | `POST /api/staff` | Admin | Reset password / delete staff |
 | `GET /api/appointments` | Logged in | List or search appointments |
 | `POST /api/appointments` | Logged in | Register appointment |
+| `DELETE /api/appointments?number=` | Logged in | Cancel/delete appointment and its bill |
 | `GET /api/bill?number=` | Logged in | Load bill for appointment |
 | `POST /api/bill` | Logged in | Save bill with fee/discount |
 
@@ -142,7 +143,7 @@ util/       → DatabaseInitializer, PasswordUtil, ValidationUtil, ServiceFactor
 2. Admin staff management (edit, activate/deactivate, reset password, delete)
 3. Admin dentist management with working hours
 4. Dentist availability check by date/time
-5. Strict appointment validation and multi-field search
+5. Strict appointment validation, multi-field search, and cancellation
 6. Database-backed billing with discounts and saved receipts
 7. Role-aware navigation and dashboards
 8. Help section and logout
